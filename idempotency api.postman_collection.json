@@ -1,0 +1,215 @@
+{
+	"info": {
+		"_postman_id": "94292b68-3aaf-4689-92de-440a316aaa97",
+		"name": "idempotency api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "create order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var requestJson = JSON.parse(pm.request.body);\r",
+							"pm.collectionVariables.set(\"userEmail\",  pm.request.headers.get(\"X-Auth-Client\"));\r",
+							"pm.collectionVariables.set(\"idempotencyKey\", pm.request.headers.get(\"Idempotency-Key\"));\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"\r",
+							"});\r",
+							"\r",
+							"console.log(\"request: \", pm.request);\r",
+							"console.log(\"response: \", pm.response);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Auth-Client",
+						"value": "{{$randomEmail}}",
+						"type": "text"
+					},
+					{
+						"key": "Idempotency-Key",
+						"value": "{{$randomUUID}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "10000"
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/orders",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "re-create create order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"\r",
+							"});\r",
+							"\r",
+							"console.log(\"request: \", pm.request);\r",
+							"console.log(\"response: \", pm.response);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Client",
+						"type": "text",
+						"value": "{{userEmail}}"
+					},
+					{
+						"key": "Idempotency-Key",
+						"type": "text",
+						"value": "{{idempotencyKey}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "10000"
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/orders",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create other order with same idempotency key",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"\r",
+							"});\r",
+							"\r",
+							"console.log(\"request: \", pm.request);\r",
+							"console.log(\"response: \", pm.response);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "X-Auth-Client",
+						"type": "text",
+						"value": "{{userEmail}}"
+					},
+					{
+						"key": "Idempotency-Key",
+						"type": "text",
+						"value": "{{idempotencyKey}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "10001"
+				},
+				"url": {
+					"raw": "http://{{baseUrl}}/orders",
+					"protocol": "http",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userEmail",
+			"value": ""
+		},
+		{
+			"key": "idempotencyKey",
+			"value": ""
+		},
+		{
+			"key": "baseUrl",
+			"value": "arch.homework/otusapp/kuzmicheva"
+		}
+	]
+}
